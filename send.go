@@ -10,9 +10,7 @@ func Send(queue string, message string) {
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer func() {
 		cErr := conn.Close()
-		if cErr != nil {
-			log.Fatal(cErr)
-		}
+		failOnError(cErr, "Failed to close RMQ connection")
 	}()
 
 	ch, err := conn.Channel()
