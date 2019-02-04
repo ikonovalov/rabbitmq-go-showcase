@@ -40,7 +40,14 @@ func Receive(queue string) {
 
 	go func() {
 		for d := range msgs {
-			log.Printf("Received a message: %s", d.Body)
+			body := string(d.Body)
+			switch body {
+			case "panic":
+				log.Panic("PANIC!")
+			default:
+				log.Printf("Received a message: %s", body)
+			}
+
 		}
 	}()
 
