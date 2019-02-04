@@ -38,18 +38,18 @@ func Payload(args []string) string {
 }
 
 func NowTime() string {
-	t := time.Now()
-	return t.Format(time.RFC3339)
+	return time.Now().Format(time.RFC3339)
 }
 
-func RepeatTime(args []string) int64 {
+func RepeatTime(args []string) (times int64) {
 	if len(args) > 2 {
 		r, e := strconv.ParseInt(args[2], 10, 64)
 		failOnError(e, "Wrong times number")
-		return r
+		times = r
 	} else {
-		return 1
+		times = 1
 	}
+	return times
 }
 
 func CheckInputArguments(args []string) {
