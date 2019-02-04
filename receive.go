@@ -7,13 +7,23 @@ import (
 )
 
 func Receive(queue string) {
+	// open connection
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
-	defer conn.Close()
+	defer func() {
+		log.Panicln("Closing connection")
+		cErr := conn.Close()
+		failOnError(cErr, "Failed to close RMQ connection")
+	}()
 
+	// open channel
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
-	defer ch.Close()
+	defer func() {
+		log.Panicln("Closing channel")
+		cErr := ch.Close()
+		failOnError(cErr, "Failed to close RMQ channel")
+	}()
 
 	q, err := ch.QueueDeclare(
 		queue, // name
@@ -25,7 +35,7 @@ func Receive(queue string) {
 	)
 	failOnError(err, "Failed to declare a queue")
 
-	msgs, err := ch.Consume(
+	messages, err := ch.Consume(
 		q.Name, // queue
 		"",     // consumer
 		true,   // auto-ack
@@ -39,7 +49,7 @@ func Receive(queue string) {
 	forever := make(chan bool)
 
 	go func() {
-		for d := range msgs {
+		for d := range messages {
 			body := string(d.Body)
 			switch body {
 			case "panic":
