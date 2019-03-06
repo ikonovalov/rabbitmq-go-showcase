@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-func Send(queue string, message string) {
+func Send(queue string, message string, times int) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer func() {
@@ -28,17 +28,19 @@ func Send(queue string, message string) {
 	failOnError(err, "Failed to declare a queue")
 
 	body := message
-	err = ch.Publish(
-		"",     // exchange
-		q.Name, // routing key
-		false,  // mandatory
-		false,  // immediate
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(body),
-		})
-	failOnError(err, "Failed to publish a message")
 
+	for i := 0; i < times; i++ {
+		err = ch.Publish(
+			"",     // exchange
+			q.Name, // routing key
+			false,  // mandatory
+			false,  // immediate
+			amqp.Publishing{
+				ContentType: "text/plain",
+				Body:        []byte(body),
+			})
+		failOnError(err, "Failed to publish a message")
+	}
 	log.Println("Done")
 
 }

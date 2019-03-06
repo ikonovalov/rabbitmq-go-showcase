@@ -18,10 +18,7 @@ func main() {
 		payload := Payload(args)
 		times := RepeatTime(args)
 
-		var i int64 = 0
-		for ; i < times; i++ {
-			Send(queueName, payload)
-		}
+		Send(queueName, payload, times)
 	case "r":
 		Receive(queueName)
 	default:
@@ -41,11 +38,11 @@ func NowTime() string {
 	return time.Now().Format(time.RFC3339)
 }
 
-func RepeatTime(args []string) (times int64) {
+func RepeatTime(args []string) (times int) {
 	if len(args) > 2 {
 		r, e := strconv.ParseInt(args[2], 10, 64)
 		failOnError(e, "Wrong times number")
-		times = r
+		times = int(r)
 	} else {
 		times = 1
 	}
