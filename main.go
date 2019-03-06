@@ -7,20 +7,24 @@ import (
 	"time"
 )
 
+type RMQ struct {
+	url string
+}
+
 func main() {
 	args := os.Args[1:]
 	CheckInputArguments(args)
 
+	rmq := RMQ{url: "amqp://guest:guest@localhost:5672/"}
 	cmd := args[0]
 	const queueName = "RMQ-HELLO-RQ"
 	switch cmd {
 	case "s":
 		payload := Payload(args)
 		times := RepeatTime(args)
-
-		Send(queueName, payload, times)
+		rmq.Send(queueName, payload, times)
 	case "r":
-		Receive(queueName)
+		rmq.Receive(queueName)
 	default:
 		log.Println("Unknown command")
 	}

@@ -6,9 +6,9 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func Receive(queue string) {
+func (rmq *RMQ) Receive(queue string) {
 	// open connection
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial(rmq.url)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer func() {
 		log.Panicln("Closing connection")
@@ -38,7 +38,7 @@ func Receive(queue string) {
 	messages, err := ch.Consume(
 		q.Name, // queue
 		"",     // consumer
-		true,   // auto-ack
+		false,  // auto-ack
 		false,  // exclusive
 		false,  // no-local
 		false,  // no-wait
@@ -57,6 +57,7 @@ func Receive(queue string) {
 			default:
 				log.Printf("Received a message: %s", body)
 			}
+			d.Ack(true)
 
 		}
 	}()

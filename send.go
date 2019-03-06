@@ -5,8 +5,12 @@ import (
 	"log"
 )
 
-func Send(queue string, message string, times int) {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+func (rmq *RMQ) SendOne(queue string, message string) {
+	rmq.Send(queue, message, 1)
+}
+
+func (rmq *RMQ) Send(queue string, message string, times int) {
+	conn, err := amqp.Dial(rmq.url)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer func() {
 		cErr := conn.Close()
