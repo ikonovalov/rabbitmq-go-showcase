@@ -57,7 +57,8 @@ func (rmq *RMQ) Receive(queue string) {
 			default:
 				log.Printf("Received a message: %s", body)
 			}
-			d.Ack(true)
+			ackError := d.Ack(true)
+			failOnError(ackError, "ACK failed")
 
 		}
 	}()

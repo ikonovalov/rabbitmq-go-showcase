@@ -12,14 +12,11 @@ func (rmq *RMQ) SendOne(queue string, message string) {
 func (rmq *RMQ) Send(queue string, message string, times int) {
 	conn, err := amqp.Dial(rmq.url)
 	failOnError(err, "Failed to connect to RabbitMQ")
-	defer func() {
-		cErr := conn.Close()
-		failOnError(cErr, "Failed to close RMQ connection")
-	}()
+	defer func() { failOnError(conn.Close(), "Failed to close RMQ connection") }()
 
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
-	defer ch.Close()
+	defer func() { failOnError(ch.Close(), "Fail to close channel") }()
 
 	q, err := ch.QueueDeclare(
 		queue, // name
