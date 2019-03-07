@@ -17,14 +17,21 @@ func main() {
 
 	rmq := RMQ{url: "amqp://guest:guest@localhost:5672/"}
 	cmd := args[0]
+
 	const queueName = "RMQ-HELLO-RQ"
+	const exchangeName = "hello-exchange"
+
 	switch cmd {
 	case "s":
 		payload := Payload(args)
 		times := RepeatTime(args)
 		rmq.Send(queueName, payload, times)
+	case "se":
+		payload := Payload(args)
+		times := RepeatTime(args)
+		rmq.SendExchange(exchangeName, payload, times)
 	case "r":
-		rmq.Receive(queueName)
+		rmq.Receive(exchangeName)
 	default:
 		log.Println("Unknown command")
 	}

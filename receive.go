@@ -6,7 +6,7 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func (rmq *RMQ) Receive(queue string) {
+func (rmq *RMQ) Receive(exchange string) {
 	// open connection
 	conn, err := amqp.Dial(rmq.url)
 	failOnError(err, "Failed to connect to RabbitMQ")
@@ -26,14 +26,30 @@ func (rmq *RMQ) Receive(queue string) {
 	}()
 
 	q, err := ch.QueueDeclare(
-		queue, // name
+		"",    // name
 		false, // durable
 		false, // delete when unused
-		false, // exclusive
+		true,  // exclusive
 		false, // no-wait
 		nil,   // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
+
+	err = ch.Qos(
+		1,     // prefetch count
+		0,     // prefetch size
+		false, // global
+	)
+	failOnError(err, "Failed to set QoS")
+
+	err = ch.QueueBind(
+		q.Name,   // queue name
+		"",       // routing key
+		exchange, // exchange
+		false,
+		nil,
+	)
+	failOnError(err, "Fail to bind queue to exchange")
 
 	messages, err := ch.Consume(
 		q.Name, // queue
@@ -57,7 +73,7 @@ func (rmq *RMQ) Receive(queue string) {
 			default:
 				log.Printf("Received a message: %s", body)
 			}
-			ackError := d.Ack(true)
+			ackError := d.Ack(false)
 			failOnError(ackError, "ACK failed")
 
 		}
